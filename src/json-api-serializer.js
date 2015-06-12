@@ -24,16 +24,28 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Flatten links
    */
   normalize: function(type, hash, prop) {
-    var json = {};
-    for (var key in hash) {
+    var json = {}, attrs = {};
+
+    if (Ember.typeOf(hash.attributes) === 'object') {
+      attrs = hash.attributes;
+      delete hash.attributes;
+
+      attrs['id'] = hash['id'];
+      attrs['type'] = hash['type'];
+      attrs['links'] = hash['links'];
+    } else {
+      attrs = hash;
+    }
+
+    for (var key in attrs) {
       // This is already normalized
       if (key === 'links') {
-        json[key] = hash[key];
+        json[key] = attrs[key];
         continue;
       }
 
       var camelizedKey = Ember.String.camelize(key);
-      json[camelizedKey] = hash[key];
+      json[camelizedKey] = attrs[key];
     }
 
     return this._super(type, json, prop);
